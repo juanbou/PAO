@@ -357,9 +357,26 @@ p {
 }
 
 /* Modal and Overlays */
-#lesson-overlay,
+#lesson-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: var(--surface-color);
+    z-index: 2000;
+    display: none;
+    flex-direction: column;
+    padding: 30px 20px;
+    overflow-y: auto;
+}
+
+#lesson-overlay.active {
+    display: flex;
+}
+
 #lesson-intro {
-    background: #fff !important;
+    background: var(--surface-color) !important;
 }
 
 .lesson-header {
