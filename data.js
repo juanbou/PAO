@@ -35,9 +35,9 @@ const defaultPaoList = [
     { card: '8♠', s: 'spades', v: '8', code: 'P-CH', p: 'Pikachu', a: 'Electrocutando', o: 'Pokéball' },
     { card: '9♠', s: 'spades', v: '9', code: 'P-B', p: 'Peaky Blinder (Tommy)', a: 'Fumando', o: 'Gorra con Cuchilla' },
     { card: '10♠', s: 'spades', v: '10', code: 'P-R', p: 'Power Ranger', a: 'Transformando', o: 'Zord' },
-    { card: 'J♠', s: 'spades', v: 'J', code: 'J♠', p: 'Peppa Pig', a: 'Saltando', o: 'Charco de Barro' },
-    { card: 'Q♠', s: 'spades', v: 'Q', code: 'Q♠', p: 'Princesa Peach', a: 'Conduciendo', o: 'Kart' },
-    { card: 'K♠', s: 'spades', v: 'K', code: 'K♠', p: 'Poseidón', a: 'Ahogando', o: 'Tridente' },
+    { card: 'J♠', s: 'spades', v: 'J', code: 'J♠ (Joven)', p: 'Percy Jackson', a: 'Invocando', o: 'Agua del mar' },
+    { card: 'Q♠', s: 'spades', v: 'Q', code: 'Q♠ (Mujer)', p: 'Pocahontas', a: 'Navegando', o: 'Canoa' },
+    { card: 'K♠', s: 'spades', v: 'K', code: 'K♠ (Rey/Líder)', p: 'Poseidón', a: 'Ahogando', o: 'Tridente' },
 
     // Corazones (C)
     { card: 'A♥', s: 'hearts', v: 'A', code: 'C-T', p: 'Capitán América', a: 'Lanzando', o: 'Escudo' },
@@ -50,9 +50,9 @@ const defaultPaoList = [
     { card: '8♥', s: 'hearts', v: '8', code: 'C-CH', p: 'Chewbacca', a: 'Aullando', o: 'Ballesta Láser' },
     { card: '9♥', s: 'hearts', v: '9', code: 'C-B', p: 'Cardi B', a: 'Rapeando', o: 'Zapatos Balenciaga' },
     { card: '10♥', s: 'hearts', v: '10', code: 'C-R', p: 'Charlie Puth', a: 'Cantando', o: 'Piano' },
-    { card: 'J♥', s: 'hearts', v: 'J', code: 'J♥', p: 'Cupido', a: 'Flechando', o: 'Arco' },
-    { card: 'Q♥', s: 'hearts', v: 'Q', code: 'Q♥', p: 'Cruella de Vil', a: 'Conduciendo', o: 'Abrigo de Piel' },
-    { card: 'K♥', s: 'hearts', v: 'K', code: 'K♥', p: 'Kylo Ren (Corazones)', a: 'Cortando', o: 'Sable Láser Rojo' },
+    { card: 'J♥', s: 'hearts', v: 'J', code: 'J♥ (Joven)', p: 'Casper', a: 'Traspasando', o: 'Pared Blanca' },
+    { card: 'Q♥', s: 'hearts', v: 'Q', code: 'Q♥ (Mujer)', p: 'Cleopatra', a: 'Bañando', o: 'Tinna de Leche' },
+    { card: 'K♥', s: 'hearts', v: 'K', code: 'K♥ (Rey/Líder)', p: 'Conde Drácula', a: 'Mordiendo', o: 'Cuello' },
 
     // Tréboles (T)
     { card: 'A♣', s: 'clubs', v: 'A', code: 'T-T', p: 'Tom Holland', a: 'Balanceando', o: 'Traje Spiderman' },
@@ -65,9 +65,9 @@ const defaultPaoList = [
     { card: '8♣', s: 'clubs', v: '8', code: 'T-J', p: 'Tom (y Jerry)', a: 'Persiguiendo', o: 'Trampa de ratón' },
     { card: '9♣', s: 'clubs', v: '9', code: 'T-V', p: 'Travis Scott', a: 'Saltando (Concierto)', o: 'Zapatillas Jordan' },
     { card: '10♣', s: 'clubs', v: '10', code: 'T-R', p: 'T-Rex (Jurassic)', a: 'Rugiendo', o: 'Hueso gigante' },
-    { card: 'J♣', s: 'clubs', v: 'J', code: 'J♣', p: 'Tarzán', a: 'Gritando', o: 'Liana' },
-    { card: 'Q♣', s: 'clubs', v: 'Q', code: 'Q♣', p: 'Tinkerbell', a: 'Volando', o: 'Polvo de hadas' },
-    { card: 'K♣', s: 'clubs', v: 'K', code: 'K♣', p: 'Terminator', a: 'Disparando', o: 'Escopeta' },
+    { card: 'J♣', s: 'clubs', v: 'J', code: 'J♣ (Joven)', p: 'Tintín', a: 'Investigando', o: 'Lupa' },
+    { card: 'Q♣', s: 'clubs', v: 'Q', code: 'Q♣ (Mujer)', p: 'Teresa de Calcuta', a: 'Rezando', o: 'Rosario' },
+    { card: 'K♣', s: 'clubs', v: 'K', code: 'K♣ (Rey/Líder)', p: 'Terminator', a: 'Disparando', o: 'Escopeta' },
 
     // Rombos/Diamantes (R)
     { card: 'A♦', s: 'diamonds', v: 'A', code: 'R-T', p: 'Rata Ratatouille', a: 'Cocinando', o: 'Olla' },
@@ -77,12 +77,12 @@ const defaultPaoList = [
     { card: '5♦', s: 'diamonds', v: '5', code: 'R-L', p: 'Rosalía', a: 'Motomameando', o: 'Casco de Moto' },
     { card: '6♦', s: 'diamonds', v: '6', code: 'R-S', p: 'Ron Weasley', a: 'Hechizando', o: 'Varita Rota' },
     { card: '7♦', s: 'diamonds', v: '7', code: 'R-F', p: 'Rafa (Tortuga Ninja)', a: 'Girando', o: 'Porciones de Pizza' },
-    { card: '8♦', s: 'diamonds', v: '8', code: 'R-J', p: 'Rey Mago', a: 'Regalando', o: 'Oro' },
+    { card: '8♦', s: 'diamonds', v: '8', code: 'R-J', p: 'Rambo', a: 'Ametrallando', o: 'Cinta de Balas' },
     { card: '9♦', s: 'diamonds', v: '9', code: 'R-V', p: 'Rayo McQueen', a: 'Acelerando', o: 'Neumático' },
     { card: '10♦', s: 'diamonds', v: '10', code: 'R-R', p: 'Ryan Reynolds', a: 'Bromeando', o: 'Traje de Deadpool' },
-    { card: 'J♦', s: 'diamonds', v: 'J', code: 'J♦', p: 'Rambo', a: 'Ametrallando', o: 'Cinta de balas' },
-    { card: 'Q♦', s: 'diamonds', v: 'Q', code: 'Q♦', p: 'Rihanna', a: 'Maquillando', o: 'Paraguas (Umbrella)' },
-    { card: 'K♦', s: 'diamonds', v: 'K', code: 'K♦', p: 'Rakan (LoL)', a: 'Curando', o: 'Capa mágica' }
+    { card: 'J♦', s: 'diamonds', v: 'J', code: 'J♦ (Joven)', p: 'Robin', a: 'Acompañando', o: 'Batarang' },
+    { card: 'Q♦', s: 'diamonds', v: 'Q', code: 'Q♦ (Mujer)', p: 'Rihanna', a: 'Maquillando', o: 'Paraguas (Umbrella)' },
+    { card: 'K♦', s: 'diamonds', v: 'K', code: 'K♦ (Rey/Líder)', p: 'Rey Arturo', a: 'Desenvainando', o: 'Excalibur' }
 ];
 
 const phoneticSystem = [
@@ -97,23 +97,12 @@ const phoneticSystem = [
     { num: 9, letters: 'b, v' },
     { num: 0, letters: 'r' }
 ];
-
 // Custom Palace state
-let customPalace = [];
-const savedPalace = localStorage.getItem('customPalaceList');
-if (savedPalace) {
-    try {
-        customPalace = JSON.parse(savedPalace);
-    } catch (e) {
-        customPalace = Array(18).fill('');
-    }
-} else {
-    customPalace = Array(18).fill('');
-}
+let customPalace = JSON.parse(localStorage.getItem('paoCustomPalace')) || Array(18).fill('');
 
-const savePalaceList = () => {
-    localStorage.setItem('customPalaceList', JSON.stringify(customPalace));
-};
+function savePalaceList() {
+    localStorage.setItem('paoCustomPalace', JSON.stringify(customPalace));
+}
 
 // Load logic for PAO
 let paoList = [];

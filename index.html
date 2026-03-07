@@ -61,6 +61,30 @@
       </button>
     </nav>
   </div>
+  <div id="palace-tutorial-modal" class="modal-overlay"
+    style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index: 3000; justify-content:center; align-items:center; padding: 20px;">
+    <div class="modal-content"
+      style="background:var(--surface-color); padding: 30px; border-radius: 20px; max-width: 400px; width:100%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-height: 90vh; overflow-y:auto;">
+      <h2 style="color:var(--accent-color); text-align:center; font-size:1.6rem; margin-bottom: 15px;">🏰 Cómo crear tu
+        Palacio</h2>
+      <p style="font-size: 1.05rem; margin-bottom: 20px; text-align: left;">
+        <strong>1. Sube Fotos:</strong> Toca las casillas con el símbolo <strong>+</strong> para subir imágenes reales
+        de las habitaciones de tu casa o lugares que conozcas bien. Usa elementos fijos (la cama, el sofá, la nevera,
+        etc.).
+      </p>
+      <p style="font-size: 1.05rem; margin-bottom: 20px; text-align: left;">
+        <strong>2. Traza tu Ruta:</strong> Pulsa el botón "Trazar Ruta". Luego, <strong>desliza tu dedo</strong>
+        conectando los lugares en el orden en el que caminarías por ellos en la vida real. Empezando por la entrada,
+        hasta la última habitación.
+      </p>
+      <div
+        style="background: var(--surface-hover); padding: 15px; border-radius: 12px; margin-bottom: 25px; border-left: 4px solid var(--primary-color);">
+        <p style="margin:0; font-size:0.95rem;">💡 <strong>Consejo Experto:</strong> El Método de Loci funciona mejor si
+          el recorrido tiene lógica espacial, no te saltes habitaciones.</p>
+      </div>
+      <button class="btn" id="close-tutorial-btn" style="width:100%;">¡Entendido!</button>
+    </div>
+  </div>
 
   <script src="data.js"></script>
   <script src="app.js"></script>

@@ -1,3 +1,4 @@
+
 // Utility for DOM
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
@@ -26,9 +27,15 @@ const views = {
   `,
     palace: `
     <h1>Mi Palacio Mental</h1>
-    <p style="text-align:center; padding: 0 20px;">Sube fotos de tu casa, habitación o ruta para construir tu propio Palacio de la Memoria. Necesitas 18 lugares (Loci) para memorizar las 52 cartas.</p>
-    <div class="palace-grid" id="palace-grid-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-      <!-- Generated dynamically -->
+    <p id="palace-desc" style="text-align:center; padding: 0 20px;">Sube fotos de tu casa o ruta para construir tu propio Palacio de la Memoria.</p>
+    <div id="palace-controls" style="display:flex; justify-content:center; gap:10px; margin-bottom: 20px; padding: 0 10px;">
+        <button id="tutorial-btn" class="btn btn-secondary" style="padding:10px 15px; font-size: 0.95rem; display:flex; align-items:center; gap:5px;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg> Ver Tutorial</button>
+    </div>
+    
+    <div style="position: relative; margin: 0 auto; max-width: 500px; padding: 10px; touch-action: none;" id="palace-wrapper">
+        <div class="palace-grid" id="palace-grid-container" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; position: relative; z-index: 1;">
+          <!-- Generated dynamically -->
+        </div>
     </div>
   `,
     review: `
@@ -81,19 +88,24 @@ const views = {
 
 // Render views logic
 function renderView(viewId) {
-    const container = $('#view-container');
-    container.innerHTML = `<div class="view active">${views[viewId]}</div>`;
+    try {
 
-    // Post-render setup
-    if (viewId === 'home') setupHome();
-    if (viewId === 'learn') setupLearn();
-    if (viewId === 'palace') setupPalace();
-    if (viewId === 'review') setupReview();
-    if (viewId === 'speed') setupSpeed();
+        const container = $('#view-container');
+        container.innerHTML = `<div class="view active">${views[viewId]}</div>`;
 
-    $$('.nav-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.target === viewId);
-    });
+        // Post-render setup
+        if (viewId === 'home') setupHome();
+        if (viewId === 'learn') setupLearn();
+        if (viewId === 'palace') setupPalace();
+        if (viewId === 'review') setupReview();
+        if (viewId === 'speed') setupSpeed();
+
+        $$('.nav-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.target === viewId);
+        });
+    } catch (err) {
+        document.body.innerHTML += '<div style="color:red; background:black; position:fixed; top:0; left:0; z-index:9999; padding:20px; font-size:20px;">' + err.stack + '</div>';
+    }
 }
 
 // Global setup
@@ -114,32 +126,58 @@ document.addEventListener('DOMContentLoaded', () => {
 // HOME VIEW (PATH)
 // ------------------------------------------------------------------
 const levelsData = [
-    { id: 1, title: 'Casillero Fonético', desc: 'Repaso: Números a Letras' },
-    { id: 2, title: 'Personajes: Picas', desc: 'Identifica a los 13 personajes de Picas' },
-    { id: 3, title: 'Personajes: Corazones', desc: 'Identifica a los 13 personajes de Corazones' },
-    { id: 4, title: 'Personajes: Tréboles', desc: 'Identifica a los 13 personajes de Tréboles' },
-    { id: 5, title: 'Personajes: Rombos', desc: 'Identifica a los 13 personajes de Rombos' },
-    { id: 6, title: 'Dominio de Acciones', desc: 'Recuerda las acciones de cualquier carta' },
-    { id: 7, title: 'Dominio de Objetos', desc: 'Recuerda los objetos icónicos' },
-    { id: 8, title: 'El Palacio (P-A-O)', desc: 'Asocia 3 cartas en tu Palacio Mental' }
+    { id: 1.1, title: 'Fonética 1-4', desc: 'Aprende T/D, N/Ñ, M, C/K/Q', poolOffset: 0, poolLimit: 4 },
+    { id: 1.2, title: 'Fonética 5-8', desc: 'Aprende L, S/Z, F, J/CH', poolOffset: 4, poolLimit: 4 },
+    { id: 1.3, title: 'Fonética 9-0', desc: 'Aprende B/V, R y Test Final', poolOffset: 8, poolLimit: 2 },
+
+    { id: 2.1, title: 'Picas 1-4', desc: 'Peter Parker a Patricio', suit: 'spades', poolOffset: 0, poolLimit: 4 },
+    { id: 2.2, title: 'Picas 5-8', desc: 'Princesa Leia a Pikachu', suit: 'spades', poolOffset: 4, poolLimit: 4 },
+    { id: 2.3, title: 'Picas 9-K', desc: 'Pablo Escobar a Papa', suit: 'spades', poolOffset: 8, poolLimit: 5 },
+
+    { id: 3.1, title: 'Corazones 1-4', desc: 'Catwoman a Cocinero', suit: 'hearts', poolOffset: 0, poolLimit: 4 },
+    { id: 3.2, title: 'Corazones 5-8', desc: 'Clyde a C. Ronaldo', suit: 'hearts', poolOffset: 4, poolLimit: 4 },
+    { id: 3.3, title: 'Corazones 9-K', desc: 'Chewbacca a Celia Cruz', suit: 'hearts', poolOffset: 8, poolLimit: 5 },
+
+    { id: 4.1, title: 'Tréboles 1-4', desc: 'Terminator a Taxista', suit: 'clubs', poolOffset: 0, poolLimit: 4 },
+    { id: 4.2, title: 'Tréboles 5-8', desc: 'Thor a Tarzán', suit: 'clubs', poolOffset: 4, poolLimit: 4 },
+    { id: 4.3, title: 'Tréboles 9-K', desc: 'Toby Maguire a T-Rex', suit: 'clubs', poolOffset: 8, poolLimit: 5 },
+
+    { id: 5.1, title: 'Rombos 1-4', desc: 'Ratón Mickey a Robocop', suit: 'diamonds', poolOffset: 0, poolLimit: 4 },
+    { id: 5.2, title: 'Rombos 5-8', desc: 'Rapunzel a Rey Arturo', suit: 'diamonds', poolOffset: 4, poolLimit: 4 },
+    { id: 5.3, title: 'Rombos 9-K', desc: 'Rubius a Rambo', suit: 'diamonds', poolOffset: 8, poolLimit: 5 },
+
+    { id: 6.1, title: 'Acciones I', desc: 'Bloque aleatorio de 4', type: 'actions', randomPool: 4 },
+    { id: 6.2, title: 'Acciones II', desc: 'Bloque aleatorio de 5', type: 'actions', randomPool: 5 },
+
+    { id: 7.1, title: 'Objetos I', desc: 'Bloque aleatorio de 4', type: 'objects', randomPool: 4 },
+    { id: 7.2, title: 'Objetos II', desc: 'Bloque aleatorio de 5', type: 'objects', randomPool: 5 },
+
+    { id: 8.1, title: 'Palacio I', desc: 'Forma 2 Locus', type: 'palace', locusCount: 2 },
+    { id: 8.2, title: 'Palacio II', desc: 'Forma 3 Locus', type: 'palace', locusCount: 3 }
 ];
 
 function setupHome() {
     const pathContainer = $('#levels-path');
+    pathContainer.innerHTML = ''; // prevent duplicates
+
+    // userProgress.unlockedLevels now is an index for levelsData array (0 to length)
+    let unlockedIndex = Math.floor(userProgress.unlockedLevels);
+    // Since we changed the system, cap it safely if it bugs out:
+    if (unlockedIndex > levelsData.length - 1) unlockedIndex = levelsData.length - 1;
 
     levelsData.forEach((level, idx) => {
-        const isUnlocked = level.id <= userProgress.unlockedLevels;
-        const isCurrent = level.id === userProgress.unlockedLevels;
+        const isUnlocked = idx <= unlockedIndex;
+        const isCurrent = idx === unlockedIndex;
 
         const node = document.createElement('div');
-        node.className = `level-node ${isUnlocked ? 'unlocked' : ''}`;
+        node.className = `level-node ${isUnlocked ? 'unlocked' : ''} ${isCurrent ? 'current' : ''}`;
         node.innerHTML = `
       ${isCurrent ? '★' : (isUnlocked ? '✓' : '🔒')}
       <div class="level-node-label">${level.title}</div>
     `;
 
         if (isUnlocked) {
-            node.addEventListener('click', () => startLesson(level.id));
+            node.addEventListener('click', () => startLesson(idx));
         }
 
         pathContainer.appendChild(node);
@@ -171,8 +209,27 @@ const editPaoModalHtml = `
   </div>
 `;
 
+const palaceTutorialModalHtml = `
+  <div id="palace-tutorial-modal" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(13,17,23,0.95); z-index:3000; display:none; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(8px);">
+    <div style="background:var(--surface-color); padding:30px 20px; border-radius:16px; border:1px solid var(--surface-hover); width:100%; max-width:450px; max-height:85vh; overflow-y:auto; text-align:center;">
+      <h2 style="color:var(--primary-color); margin-bottom:15px;">📖 Taller del Palacio</h2>
+      <p style="color:var(--text-secondary); font-size:1.05rem; line-height:1.5; margin-bottom:20px; text-align:left;">
+        El Palacio de la Memoria (Método de Loci) transforma números en lugares físicos de tu vida real. Necesitas <strong>18 lugares</strong> ordenados para guardar la baraja entera.
+      </p>
+      <div style="background:var(--bg-color); padding:15px; border-radius:12px; margin-bottom:20px; text-align:left;">
+        <h4 style="color:var(--accent-color); margin-bottom:10px;">📸 Paso 1: Configura tus fotos</h4>
+        <p style="color:var(--text-secondary); font-size:0.95rem; margin:0;">Toca cualquier recuadro vacío para abrir tu cámara o galería y subir hasta 18 fotos en orden de las habitaciones de tu casa o recorridos comunes.</p>
+      </div>
+      <button class="btn" id="close-tutorial-btn" style="width:100%; padding:15px;">¡Entendido, a crear locales!</button>
+    </div>
+  </div>
+`;
+
 if (!document.getElementById('edit-pao-modal')) {
     document.body.insertAdjacentHTML('beforeend', editPaoModalHtml);
+}
+if (!document.getElementById('palace-tutorial-modal')) {
+    document.body.insertAdjacentHTML('beforeend', palaceTutorialModalHtml);
 }
 
 function setupLearn() {
@@ -250,29 +307,53 @@ function setupPalace() {
     const container = $('#palace-grid-container');
     container.innerHTML = '';
 
+    // Check tutorial state
+    const hasSeenTutorial = localStorage.getItem('paoSeenPalaceTutorial');
+    if (!hasSeenTutorial) {
+        $('#palace-tutorial-modal').style.display = 'flex';
+        localStorage.setItem('paoSeenPalaceTutorial', 'true');
+    }
+
+    $('#tutorial-btn').onclick = () => {
+        $('#palace-tutorial-modal').style.display = 'flex';
+    };
+    $('#close-tutorial-btn').onclick = () => {
+        $('#palace-tutorial-modal').style.display = 'none';
+    };
+
+    // Render cells
     for (let i = 0; i < 18; i++) {
         const el = document.createElement('div');
         el.className = 'palace-locus';
-        el.style = 'background: var(--surface-color); border: 1px dashed var(--surface-hover); border-radius: 12px; height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; cursor:pointer;';
+        el.dataset.index = i;
+        el.style = 'background: var(--surface-color); border: 1px dashed var(--surface-hover); border-radius: 12px; height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; cursor:pointer; user-select:none; touch-action:none;';
 
         const hasImage = customPalace[i] && customPalace[i].length > 0;
+        const routeOrder = i + 1; // 1-18 order
+
+        const badgeHtml = `<div style="position:absolute; top:5px; left:5px; background:var(--accent-color); color:#fff; width:24px; height:24px; border-radius:50%; font-size:0.8rem; font-weight:bold; display:flex; align-items:center; justify-content:center; z-index:2; box-shadow:0 2px 4px rgba(0,0,0,0.5);">${routeOrder}</div>`;
 
         if (hasImage) {
             el.innerHTML = `
-               <img src="${customPalace[i]}" style="width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0;">
-               <div style="position:absolute; bottom:0; left:0; width:100%; background:rgba(0,0,0,0.7); color:#fff; text-align:center; padding:5px; font-size:0.8rem; font-weight:bold;">Locus ${i + 1}</div>
-               <input type="file" accept="image/*" class="locus-upload" data-index="${i}" style="opacity:0; position:absolute; top:0; left:0; width:100%; height:100%; cursor:pointer;">
+               ${badgeHtml}
+               <img src="${customPalace[i]}" style="width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0; z-index:0; pointer-events:none;">
+               <div style="position:absolute; bottom:0; left:0; width:100%; background:rgba(0,0,0,0.7); color:#fff; text-align:center; padding:5px; font-size:0.8rem; font-weight:bold; z-index:2;">Locus ${i + 1}</div>
+               <input type="file" accept="image/*" class="locus-upload" data-index="${i}" style="opacity:0; position:absolute; top:0; left:0; width:100%; height:100%; cursor:pointer; z-index:5;">
+               <div class="locus-overlay" style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(20, 150, 255, 0.4); z-index:3; opacity:0; transition:opacity 0.2s pointer-events:none;"></div>
             `;
         } else {
             el.innerHTML = `
-               <div style="font-size:2rem; color:var(--surface-hover); margin-bottom:10px;">+</div>
-               <div style="color:var(--text-secondary); font-size:0.9rem;">Locus ${i + 1}</div>
-               <input type="file" accept="image/*" class="locus-upload" data-index="${i}" style="opacity:0; position:absolute; top:0; left:0; width:100%; height:100%; cursor:pointer;">
+               ${badgeHtml}
+               <div style="font-size:2rem; color:var(--surface-hover); margin-bottom:10px; z-index:0; pointer-events:none;">+</div>
+               <div style="color:var(--text-secondary); font-size:0.9rem; z-index:0; pointer-events:none;">Locus ${i + 1}</div>
+               <input type="file" accept="image/*" class="locus-upload" data-index="${i}" style="opacity:0; position:absolute; top:0; left:0; width:100%; height:100%; cursor:pointer; z-index:5;">
+               <div class="locus-overlay" style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(20, 150, 255, 0.4); z-index:3; opacity:0; transition:opacity 0.2s pointer-events:none;"></div>
             `;
         }
         container.appendChild(el);
     }
 
+    // Image Upload Logic
     $$('.locus-upload').forEach(input => {
         input.addEventListener('change', (e) => {
             const file = e.target.files[0];
@@ -280,7 +361,6 @@ function setupPalace() {
 
             const reader = new FileReader();
             reader.onload = (event) => {
-                // Resize image using canvas to save localStorage space
                 const img = new Image();
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
@@ -294,8 +374,8 @@ function setupPalace() {
                     const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
                     const idx = e.target.dataset.index;
                     customPalace[idx] = compressedDataUrl;
-                    savePalaceList(); // from data.js
-                    setupPalace(); // re-render
+                    savePalaceList();
+                    setupPalace();
                 };
                 img.src = event.target.result;
             };
@@ -315,41 +395,6 @@ let speedIndex = 0;
 function formatTime(seconds) {
     const m = Math.floor(seconds / 60).toString().padStart(2, '0');
     const s = (seconds % 60).toString().padStart(2, '0');
-    return `${m}:${s}`;
-}
-
-function renderSpeedCards() {
-    const container = $('#speed-cards');
-    container.innerHTML = '';
-
-    const cardsToShow = speedDeck.slice(speedIndex, speedIndex + 3);
-
-    cardsToShow.forEach((cardData, idx) => {
-        const isRed = cardData.s === 'hearts' || cardData.s === 'diamonds';
-        const colorStyle = isRed ? 'color:#ff4b4b' : 'color:#c9d1d9';
-        const role = idx === 0 ? 'P' : (idx === 1 ? 'A' : 'O');
-
-        let hint = '';
-        if (idx === 0) hint = `(${cardData.p})`;
-        if (idx === 1) hint = `(${cardData.a})`;
-        if (idx === 2) hint = `(${cardData.o})`;
-
-        const el = document.createElement('div');
-        el.style = `background: #fff; border-radius: 8px; width: 80px; height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 800; box-shadow: 0 4px 10px rgba(0,0,0,0.5); ${colorStyle}; position: relative;`;
-        el.innerHTML = `
-      ${cardData.card}
-      <div style="position: absolute; bottom: 5px; font-size: 0.8rem; color: #666;">${role}</div>
-      <div style="position: absolute; bottom: -25px; font-size: 0.7rem; color: var(--text-secondary); width: 120px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${hint}</div>
-    `;
-        container.appendChild(el);
-    });
-
-    $('#speed-progress-text').innerText = `Cartas: ${Math.min(speedIndex + 3, 52)} / 52`;
-}
-
-function startTimer() {
-    speedTime = 0;
-    $('#active-timer').innerText = '00:00';
     clearInterval(timerInterval);
     timerInterval = setInterval(() => {
         speedTime++;
@@ -406,35 +451,35 @@ function setupSpeed() {
 // ------------------------------------------------------------------
 // We dynamically append lesson UI to body
 const lessonOverlayHtml = `
-  <div id="lesson-intro" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background:var(--bg-color); z-index:2001; display:none; flex-direction:column; padding:30px 20px; overflow-y:auto;">
-      <h1 id="intro-title" style="margin-bottom:10px;">Nivel X</h1>
-      <div id="intro-expert" style="background:var(--surface-color); padding:20px; border-radius:12px; border-left: 4px solid var(--accent-color); margin-bottom:30px;">
-          <h3 style="color:var(--accent-color); font-size:1rem; margin-bottom:10px;">💡 Consejo de Expertos</h3>
-          <p id="intro-text" style="color:var(--text-primary); font-size:1.05rem; line-height:1.6; margin:0;"></p>
-      </div>
-      <button class="btn" id="start-lesson-btn" style="margin-top:auto; padding:18px;">Comenzar Lección</button>
-      <button class="btn btn-secondary" id="cancel-lesson-btn" style="margin-top:10px; padding:18px;">Volver</button>
-  </div>
+            <div id="lesson-intro" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background:var(--bg-color); z-index:2001; display:none; flex-direction:column; padding:30px 20px; overflow-y:auto;">
+        <h1 id="intro-title" style="margin-bottom:10px;">Nivel X</h1>
+        <div id="intro-expert" style="background:var(--surface-color); padding:20px; border-radius:12px; border-left: 4px solid var(--accent-color); margin-bottom:30px;">
+            <h3 style="color:var(--accent-color); font-size:1rem; margin-bottom:10px;">💡 Consejo de Expertos</h3>
+            <p id="intro-text" style="color:var(--text-primary); font-size:1.05rem; line-height:1.6; margin:0;"></p>
+        </div>
+        <button class="btn" id="start-lesson-btn" style="margin-top:auto; padding:18px;">Comenzar Lección</button>
+        <button class="btn btn-secondary" id="cancel-lesson-btn" style="margin-top:10px; padding:18px;">Volver</button>
+    </div>
 
-  <div id="lesson-overlay">
-    <div class="lesson-header">
-       <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="lesson-progress"></div>
-      </div>
-      <button class="close-btn" id="close-lesson" style="margin-left: 15px; font-size: 1.5rem; color: #fff;">✕</button>
-    </div>
-    <div class="lesson-content">
-      <div class="question-text" id="lesson-question">¿Cuál es el P-A-O de esta carta?</div>
-      <div id="lesson-visual" style="font-size: 4rem; margin-bottom: 20px;">🃏</div>
-      <div class="options-grid" id="lesson-options">
-        <!-- Options go here -->
-      </div>
-    </div>
-    <div class="lesson-footer">
-      <button class="btn" id="lesson-continue">Continuar</button>
-    </div>
-  </div>
-`;
+            <div id="lesson-overlay">
+                <div class="lesson-header">
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="lesson-progress"></div>
+                    </div>
+                    <button class="close-btn" id="close-lesson" style="margin-left: 15px; font-size: 1.5rem; color: #fff;">✕</button>
+                </div>
+                <div class="lesson-content">
+                    <div class="question-text" id="lesson-question">¿Cuál es el P-A-O de esta carta?</div>
+                    <div id="lesson-visual" style="text-align:center; font-size: 4rem; margin-bottom: 20px;">🃏</div>
+                    <div class="options-grid" id="lesson-options">
+                        <!-- Options go here -->
+                    </div>
+                </div>
+                <div class="lesson-footer">
+                    <button class="btn" id="lesson-continue">Continuar</button>
+                </div>
+            </div>
+        `;
 
 if (!document.getElementById('lesson-overlay')) {
     document.body.insertAdjacentHTML('beforeend', lessonOverlayHtml);
@@ -442,100 +487,207 @@ if (!document.getElementById('lesson-overlay')) {
 
 let currentLessonQuestions = [];
 let currentQuestionIndex = 0;
+let currentLessonFailed = false;
 
 // Utility: Shuffle array
 function shuffle(array) {
     return array.sort(() => Math.random() - 0.5);
 }
 
-function generateLessonQuestions(levelId) {
-    let questions = [];
+function generateLessonQuestions(idx) {
+    let flashcards = [];
+    let quizzes = [];
 
-    if (levelId === 1) {
-        for (let i = 0; i < 5; i++) {
-            const target = phoneticSystem[Math.floor(Math.random() * phoneticSystem.length)];
-            const others = phoneticSystem.filter(p => p.num !== target.num).map(p => p.num);
-            const options = shuffle([target.num, ...shuffle(others).slice(0, 3)]);
-            questions.push({
+    const levelDef = levelsData[idx];
+
+    if (levelDef.id < 2) {
+        // Phonetics (Level 1.1, 1.2, 1.3)
+        const targetSystem = phoneticSystem.slice(levelDef.poolOffset, levelDef.poolOffset + levelDef.poolLimit);
+
+        targetSystem.forEach(target => {
+            flashcards.push({
+                type: 'flashcard',
+                cardId: `num-${target.num}`,
+                visual: '🧩',
+                q: `Aprende: Consonante "${target.letters.toUpperCase()}"`,
+                text: `El número ${target.num} se asocia con las letras ${target.letters.toUpperCase()}.`,
+                btnText: 'Entendido'
+            });
+
+            // Forward Question
+            const others1 = phoneticSystem.filter(p => p.num !== target.num).map(p => p.num);
+            const options1 = shuffle([target.num, ...shuffle(others1).slice(0, 3)]);
+            quizzes.push({
+                type: 'quiz',
                 cardId: `num-${target.num}`,
                 q: `¿Qué número corresponde a la consonante "${target.letters.toUpperCase()}"?`,
                 visual: '🧩',
-                options: options.map(String),
-                correct: options.indexOf(target.num)
+                options: options1.map(String),
+                correct: options1.indexOf(target.num)
             });
-        }
-    } else if (levelId >= 2 && levelId <= 5) {
-        let targetSuit = ['spades', 'hearts', 'clubs', 'diamonds'][levelId - 2];
-        let pool = paoList.filter(p => p.s === targetSuit);
-        const lessonCards = shuffle([...pool]).slice(0, 5);
 
-        lessonCards.forEach(cardData => {
-            const others = shuffle(pool.filter(p => p.card !== cardData.card)).slice(0, 3);
-            const options = shuffle([cardData.p, ...others.map(o => o.p)]);
+            // Reverse Question
+            const others2 = phoneticSystem.filter(p => p.num !== target.num).map(p => p.letters.toUpperCase());
+            const options2 = shuffle([target.letters.toUpperCase(), ...shuffle(others2).slice(0, 3)]);
+            quizzes.push({
+                type: 'quiz',
+                cardId: `num-${target.num}`,
+                q: `¿Qué consonantes corresponden al número "${target.num}"?`,
+                visual: '🧩',
+                options: options2,
+                correct: options2.indexOf(target.letters.toUpperCase())
+            });
+        });
+    } else if (levelDef.suit) {
+        // Characters (Levels 2.1 to 5.3)
+        let pool = paoList.filter(p => p.s === levelDef.suit)
+            .slice(levelDef.poolOffset, levelDef.poolOffset + levelDef.poolLimit);
+
+        pool.forEach(cardData => {
             const isRed = cardData.s === 'hearts' || cardData.s === 'diamonds';
             const colorStyle = isRed ? 'color:#ff4b4b' : 'color:#c9d1d9';
 
-            questions.push({
+            flashcards.push({
+                type: 'flashcard',
                 cardId: cardData.card,
-                q: `¿Qué personaje corresponde a esta carta?`,
                 visual: `<span style="${colorStyle}">${cardData.card}</span>`,
-                options: options,
-                correct: options.indexOf(cardData.p)
+                q: `Aprende: Personaje`,
+                text: `${cardData.card} es ${cardData.p}`,
+                btnText: 'Memorizado'
+            });
+
+            const others = shuffle(paoList.filter(p => p.card !== cardData.card && p.s === levelDef.suit)).slice(0, 3);
+
+            // Forward Question
+            const options1 = shuffle([cardData.p, ...others.map(o => o.p)]);
+            quizzes.push({
+                type: 'quiz',
+                cardId: cardData.card,
+                q: `¿Qué personaje corresponde a esta carta (${cardData.card})?`,
+                visual: `<span style="${colorStyle}">${cardData.card}</span>`,
+                options: options1,
+                correct: options1.indexOf(cardData.p)
+            });
+
+            // Reverse Question
+            const options2 = shuffle([cardData.card, ...others.map(o => o.card)]);
+            quizzes.push({
+                type: 'quiz',
+                cardId: cardData.card,
+                q: `¿Qué carta corresponde al personaje "${cardData.p}"?`,
+                visual: '👤',
+                options: options2,
+                correct: options2.indexOf(cardData.card)
             });
         });
-    } else if (levelId === 6) {
-        // Acciones
-        const lessonCards = shuffle([...paoList]).slice(0, 5);
+    } else if (levelDef.type === 'actions') {
+        // Actions
+        const lessonCards = shuffle([...paoList]).slice(0, levelDef.randomPool);
         lessonCards.forEach(cardData => {
+            flashcards.push({
+                type: 'flashcard',
+                cardId: cardData.card,
+                visual: '🎬',
+                q: `Aprende: Acción`,
+                text: `La acción de ${cardData.p} es "${cardData.a}"`,
+                btnText: 'Memorizado'
+            });
+
             const others = shuffle(paoList.filter(p => p.card !== cardData.card)).slice(0, 3);
-            const options = shuffle([cardData.a, ...others.map(o => o.a)]);
-            questions.push({
+
+            // Forward Question
+            const options1 = shuffle([cardData.a, ...others.map(o => o.a)]);
+            quizzes.push({
+                type: 'quiz',
                 cardId: cardData.card,
                 q: `¿Qué ACCIÓN realiza ${cardData.p}?`,
                 visual: '🎬',
-                options: options,
-                correct: options.indexOf(cardData.a)
+                options: options1,
+                correct: options1.indexOf(cardData.a)
+            });
+
+            // Reverse Question
+            const options2 = shuffle([cardData.p, ...others.map(o => o.p)]);
+            quizzes.push({
+                type: 'quiz',
+                cardId: cardData.card,
+                q: `¿De qué personaje es la acción "${cardData.a}" ? `,
+                visual: '🎬',
+                options: options2,
+                correct: options2.indexOf(cardData.p)
             });
         });
-    } else if (levelId === 7) {
-        // Objetos
-        const lessonCards = shuffle([...paoList]).slice(0, 5);
+    } else if (levelDef.type === 'objects') {
+        const lessonCards = shuffle([...paoList]).slice(0, levelDef.randomPool);
         lessonCards.forEach(cardData => {
+            flashcards.push({
+                type: 'flashcard',
+                cardId: cardData.card,
+                visual: '📦',
+                q: `Aprende: Objeto`,
+                text: `El objeto de ${cardData.p} es "${cardData.o}"`,
+                btnText: 'Memorizado'
+            });
+
             const others = shuffle(paoList.filter(p => p.card !== cardData.card)).slice(0, 3);
-            const options = shuffle([cardData.o, ...others.map(o => o.o)]);
-            questions.push({
+
+            // Forward Question
+            const options1 = shuffle([cardData.o, ...others.map(o => o.o)]);
+            quizzes.push({
+                type: 'quiz',
                 cardId: cardData.card,
                 q: `¿Cuál es el OBJETO icónico de ${cardData.p}?`,
                 visual: '📦',
-                options: options,
-                correct: options.indexOf(cardData.o)
+                options: options1,
+                correct: options1.indexOf(cardData.o)
+            });
+
+            // Reverse Question
+            const options2 = shuffle([cardData.p, ...others.map(o => o.p)]);
+            quizzes.push({
+                type: 'quiz',
+                cardId: cardData.card,
+                q: `¿De qué personaje es el objeto "${cardData.o}" ? `,
+                visual: '📦',
+                options: options2,
+                correct: options2.indexOf(cardData.p)
             });
         });
-    } else {
+    } else if (levelDef.type === 'palace') {
         // Palacio
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < levelDef.locusCount; i++) {
             const cards = shuffle([...paoList]).slice(0, 3);
             const p = cards[0], a = cards[1], o = cards[2];
-            questions.push({
-                q: `Imagina estar en un locus de tu Palacio Mental. Genera la historia para:`,
-                visual: `<span style="font-size:1.8rem">${p.card} | ${a.card} | ${o.card}</span>`,
+
+            // Integrate user uploaded locus photos here!
+            const idxLevelOffset = (levelDef.id === 8.1) ? i : (i + 9);
+            const locusIndex = idxLevelOffset;
+            const hasImage = customPalace && customPalace[locusIndex] && customPalace[locusIndex].length > 0;
+            const visualHtml = hasImage
+                ? `<div style="position:relative; width:150px; height:150px; border-radius:12px; overflow:hidden; margin: 0 auto; margin-bottom:15px; border:2px solid var(--accent-color);"><img src="${customPalace[locusIndex]}" style="width:100%; height:100%; object-fit:cover;"><div style="position:absolute; bottom:0; width:100%; background:rgba(0,0,0,0.6); font-size:0.8rem; color:#fff; text-align:center; padding:2px;">Orden ${idxLevelOffset + 1}</div></div><span style="font-size:1.8rem">${p.card} | ${a.card} | ${o.card}</span>`
+                : `<span style="font-size:1.8rem">${p.card} | ${a.card} | ${o.card}</span>`;
+
+            quizzes.push({
+                type: 'quiz',
+                q: `En el Locus ${idxLevelOffset + 1} de la ruta.Activa P - A - O para: `,
+                visual: visualHtml,
                 options: shuffle([
-                    `${p.p} | ${a.a} | ${o.o}`,
-                    `${a.p} | ${p.a} | ${o.o}`,
-                    `${p.p} | ${o.a} | ${a.o}`,
-                    `${o.p} | ${a.a} | ${p.o}`
+                    `${p.p} | ${a.a} | ${o.o} `,
+                    `${a.p} | ${p.a} | ${o.o} `,
+                    `${p.p} | ${o.a} | ${a.o} `,
+                    `${o.p} | ${a.a} | ${p.o} `
                 ]),
-                correct: -1 // Will be set dynamically since we shuffled options
+                correct: -1
             });
-            questions[i].correct = questions[i].options.indexOf(`${p.p} | ${a.a} | ${o.o}`);
+            quizzes[quizzes.length - 1].correct = quizzes[quizzes.length - 1].options.indexOf(`${p.p} | ${a.a} | ${o.o} `);
         }
     }
 
-    return questions;
+    return [...flashcards, ...shuffle(quizzes)];
 }
 
 const expertTips = {
-    1: "El primer paso del sistema PAO es dominar la equivalencia Número-Letra (Ej: 1=T/D, 2=N). Expertos como Dominic O'Brien recomiendan que esta conversión debe ser automática antes de avanzar a los personajes. Céntrate en la velocidad de respuesta.",
+    1: "El primer paso del sistema PAO es dominar la equivalencia Número-Letra. Expertos como Dominic O'Brien recomiendan que esta conversión debe ser automática antes de avanzar a los personajes. Céntrate en la velocidad de respuesta.",
     2: "Los personajes de Picas inician con 'P'. Según los campeones de memoria, debemos imaginar a las personas con extremo detalle facial y emocional. Cuanto más ridícula y exagerada sea la visualización, más adherencia tendrá en el cerebro.",
     3: "Los personajes de Corazones (C) deben involucrar emociones fuertes. Usa tus sentidos: visualiza el color rojo vibrante y añade texturas mentales a cada persona para afianzar el recuerdo.",
     4: "Al aprender los Tréboles (T), asocia a los personajes con elementos de la naturaleza o contundentes. Recuerda la regla del Sistema PAO: todo personaje debe tener una acción y un objeto intrínsecos a él.",
@@ -545,11 +697,14 @@ const expertTips = {
     8: "El Palacio de la Memoria (Método de Loci): Basado en Cicerón, sitúa cada tríada P-A-O en una habitación estructurada de un lugar real que conozcas bien (tu casa, tu escuela). El anclaje espacial multiplica x10 la retención."
 };
 
-function startLesson(levelId) {
+function startLesson(idx) {
+    const levelDef = levelsData[idx];
+    const categoryId = Math.floor(levelDef.id);
+
     const intro = $('#lesson-intro');
     intro.style.display = 'flex';
-    $('#intro-title').innerText = levelsData.find(l => l.id === levelId).title;
-    $('#intro-text').innerText = expertTips[levelId];
+    $('#intro-title').innerText = levelDef.title;
+    $('#intro-text').innerText = expertTips[categoryId] || expertTips[1];
 
     $('#cancel-lesson-btn').onclick = () => { intro.style.display = 'none'; };
 
@@ -558,9 +713,10 @@ function startLesson(levelId) {
         const overlay = $('#lesson-overlay');
         overlay.classList.add('active');
 
-        currentLessonQuestions = generateLessonQuestions(levelId);
+        currentLessonQuestions = generateLessonQuestions(idx);
         currentQuestionIndex = 0;
-        loadQuestion(false, levelId);
+        currentLessonFailed = false;
+        loadQuestion(false, idx);
 
         $('#close-lesson').onclick = () => {
             overlay.classList.remove('active');
@@ -568,67 +724,90 @@ function startLesson(levelId) {
     };
 }
 
-function loadQuestion(isReviewMode = false, levelId = null) {
+function loadQuestion(isReviewMode = false, levelIdx = null) {
+    if ($('#lesson-feedback')) $('#lesson-feedback').remove();
+
     const q = currentLessonQuestions[currentQuestionIndex];
     $('#lesson-question').innerText = q.q;
-    $('#lesson-visual').innerHTML = q.visual || '';
+
+    // In flashcard mode, show text below visual
+    if (q.type === 'flashcard') {
+        $('#lesson-visual').innerHTML = `${q.visual || ''} <div style="font-size:1.2rem; color:var(--accent-color); font-weight:700; margin-top:15px; background:var(--surface-hover); padding:15px; border-radius:12px;">${q.text}</div>`;
+    } else {
+        $('#lesson-visual').innerHTML = q.visual || '';
+    }
 
     const prog = (currentQuestionIndex / currentLessonQuestions.length) * 100;
-    $('#lesson-progress').style.width = `${prog}%`;
+    $('#lesson-progress').style.width = `${prog}% `;
 
     $('#lesson-continue').style.display = 'none';
     const optContainer = $('#lesson-options');
     optContainer.innerHTML = '';
 
-    q.options.forEach((opt, idx) => {
-        const btn = document.createElement('button');
-        btn.className = 'option-btn';
-        btn.innerText = opt;
-        btn.onclick = () => {
-            $$('.option-btn').forEach(b => b.disabled = true);
-            if (idx === q.correct) {
-                btn.classList.add('correct');
-                $('#lesson-continue').style.display = 'inline-flex';
-                $('#lesson-continue').innerText = 'Continuar'; // Ensure it's correct text
-                $('#lesson-continue').onclick = () => {
-                    currentQuestionIndex++;
-                    if (currentQuestionIndex >= currentLessonQuestions.length) {
-                        finishLesson(isReviewMode ? null : levelId, isReviewMode);
-                    } else {
-                        loadQuestion(isReviewMode, levelId);
-                    }
-                };
-                if (q.cardId) updateSrs(q.cardId, true);
+    if (q.type === 'flashcard') {
+        $('#lesson-continue').innerText = q.btnText || 'Continuar';
+        $('#lesson-continue').style.display = 'inline-flex';
+        $('#lesson-continue').onclick = () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex >= currentLessonQuestions.length) {
+                finishLesson(isReviewMode ? null : levelIdx, isReviewMode);
             } else {
-                btn.classList.add('wrong');
-                $$('.option-btn')[q.correct].classList.add('correct');
+                loadQuestion(isReviewMode, levelIdx);
+            }
+        };
+    } else {
+        // Normal Quiz
+        q.options.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => {
+                $$('.option-btn').forEach(b => b.disabled = true);
+                if (idx === q.correct) {
+                    btn.classList.add('correct');
+                    $('#lesson-continue').style.display = 'inline-flex';
+                    $('#lesson-continue').innerText = 'Continuar';
+                    $('#lesson-continue').onclick = () => {
+                        currentQuestionIndex++;
+                        if (currentQuestionIndex >= currentLessonQuestions.length) {
+                            finishLesson(isReviewMode ? null : levelIdx, isReviewMode);
+                        } else {
+                            loadQuestion(isReviewMode, levelIdx);
+                        }
+                    };
+                    if (q.cardId) updateSrs(q.cardId, true);
+                } else {
+                    btn.classList.add('wrong');
+                    $$('.option-btn')[q.correct].classList.add('correct');
+                    currentLessonFailed = true;
 
-                if (isReviewMode) {
-                    $('#lesson-continue').innerText = 'Continuar (Repaso)';
+                    $('#lesson-visual').insertAdjacentHTML('afterend', `< div id = "lesson-feedback" style = "margin-top:10px; color:var(--error-color); font-weight:bold;" >¡Incorrecto! La respuesta era: ${q.options[q.correct]}</div > `);
+
+                    if (isReviewMode) {
+                        $('#lesson-continue').innerText = 'Continuar (Repaso)';
+                    } else {
+                        $('#lesson-continue').innerText = 'Continuar con fallos';
+                    }
+
                     $('#lesson-continue').style.display = 'inline-flex';
                     $('#lesson-continue').onclick = () => {
                         currentQuestionIndex++;
                         if (currentQuestionIndex >= currentLessonQuestions.length) {
-                            finishLesson(null, isReviewMode);
+                            finishLesson(isReviewMode ? null : levelIdx, isReviewMode);
                         } else {
-                            loadQuestion(isReviewMode, levelId);
+                            loadQuestion(isReviewMode, levelIdx);
                         }
                     };
-                } else {
-                    $('#lesson-continue').innerText = 'Reintentar Lección';
-                    $('#lesson-continue').style.display = 'inline-flex';
-                    $('#lesson-continue').onclick = () => {
-                        startLesson(levelId); // Restart on fail
-                    };
+
+                    if (q.cardId) updateSrs(q.cardId, false);
                 }
-                if (q.cardId) updateSrs(q.cardId, false);
-            }
-        };
-        optContainer.appendChild(btn);
-    });
+            };
+            optContainer.appendChild(btn);
+        });
+    }
 }
 
-function finishLesson(levelId, isReviewMode = false) {
+function finishLesson(levelIdx, isReviewMode = false) {
     $('#lesson-overlay').classList.remove('active');
 
     if (isReviewMode) {
@@ -636,11 +815,18 @@ function finishLesson(levelId, isReviewMode = false) {
         return;
     }
 
-    if (levelId && userProgress.unlockedLevels === levelId) {
-        userProgress.unlockedLevels++;
-        saveProgress();
-        setupHome(); // refresh path
+    if (levelIdx !== null && levelIdx !== undefined) {
+        if (!currentLessonFailed) {
+            if (userProgress.unlockedLevels <= levelIdx) {
+                userProgress.unlockedLevels = levelIdx + 1;
+                saveProgress();
+                alert('¡Sección superada con éxito!');
+            }
+        } else {
+            alert('Has completado la sección, pero tuviste errores. Debes repetirla perfectamente para desbloquear la siguiente.');
+        }
     }
+    setupHome(); // refresh path
 }
 
 // ------------------------------------------------------------------
@@ -680,8 +866,9 @@ function setupReview() {
                 const others = phoneticSystem.filter(p => p.num !== target.num).map(p => p.num);
                 const options = shuffle([target.num, ...shuffle(others).slice(0, 3)]);
                 questions.push({
+                    type: 'quiz',
                     cardId: cid,
-                    q: `Repaso: ¿Qué número corresponde a la consonante "${target.letters.toUpperCase()}"?`,
+                    q: `Repaso: ¿Qué número corresponde a la consonante "${target.letters.toUpperCase()}" ? `,
                     visual: '🧩',
                     options: options.map(String),
                     correct: options.indexOf(target.num)
@@ -694,6 +881,7 @@ function setupReview() {
                     const isRed = cardData.s === 'hearts' || cardData.s === 'diamonds';
                     const colorStyle = isRed ? 'color:#ff4b4b' : 'color:#c9d1d9';
                     questions.push({
+                        type: 'quiz',
                         cardId: cid,
                         q: `Repaso: ¿Qué personaje corresponde a esta carta?`,
                         visual: `<span style="${colorStyle}">${cardData.card}</span>`,
@@ -716,4 +904,24 @@ function setupReview() {
             setupReview();
         };
     };
+}
+
+
+// ------------------------------------------------------------------
+// INIT APP & NAVIGATION BINDINGS
+// ------------------------------------------------------------------
+document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const target = e.currentTarget.closest('.nav-btn').dataset.target;
+        renderView(target);
+    });
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+    renderView('home');
+});
+
+// Fallback if already loaded
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    renderView('home');
 }
