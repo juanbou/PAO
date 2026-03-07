@@ -171,3 +171,9 @@ const updateSrs = (cardId, isCorrect) => {
     }
     saveSrs();
 };
+
+let customPaoImages = JSON.parse(localStorage.getItem('customPaoImages')) || {};
+
+const savePaoImages = () => {
+    localStorage.setItem('customPaoImages', JSON.stringify(customPaoImages));
+};

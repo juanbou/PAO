@@ -1,7 +1,36 @@
-
 // Utility for DOM
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
+
+function getListImgHtml(cardId) {
+    const hasCustomImg = customPaoImages[cardId] && customPaoImages[cardId].length > 0;
+    if (hasCustomImg) {
+        return `<img src="${customPaoImages[cardId]}" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">`;
+    }
+    const cardSafe = cardId.replace('♠', 'S').replace('♥', 'H').replace('♣', 'C').replace('♦', 'D');
+    return `<img src="assets/pao/${cardSafe}.svg" style="width:100%; height:100%; object-fit:cover; border-radius:12px;" onerror="this.onerror=null; this.outerHTML='${cardId}';">`;
+}
+
+function getLessonVisualContent(cardData, isRed, symbolOrText) {
+    const hasCustomImg = customPaoImages[cardData.card] && customPaoImages[cardData.card].length > 0;
+    const colorStyle = isRed ? 'color:#ff4b4b' : 'color:#c9d1d9';
+    let imgHtml = '';
+
+    if (hasCustomImg) {
+        imgHtml = `<img src="${customPaoImages[cardData.card]}" style="width:100%; height:100%; object-fit:cover;">`;
+    } else {
+        const cardSafe = cardData.card.replace('♠', 'S').replace('♥', 'H').replace('♣', 'C').replace('♦', 'D');
+        imgHtml = `<img src="assets/pao/${cardSafe}.svg" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null; this.parentElement.style.display='none';">`;
+    }
+
+    const imgWrapper = `<div style="width:140px; height:140px; overflow:hidden; border-radius:12px; margin:0 auto; margin-bottom:15px; border:2px solid var(--accent-color);">${imgHtml}</div>`;
+
+    if (symbolOrText === 'personaje') return `${imgWrapper}<span style="${colorStyle}">${cardData.card}</span>`;
+    if (symbolOrText === 'accion') return `${imgWrapper}<span style="font-size:1.8rem">🎬</span>`;
+    if (symbolOrText === 'objeto') return `${imgWrapper}<span style="font-size:1.8rem">📦</span>`;
+    if (symbolOrText === 'reverse') return `${imgWrapper}👤`;
+    return `<span style="${colorStyle}">${cardData.card}</span>`;
+}
 
 // Views definition
 const views = {
@@ -199,10 +228,17 @@ const editPaoModalHtml = `
       <input type="text" id="edit-a" style="width:100%; padding:10px; margin-bottom:15px; border-radius:8px; border:1px solid var(--surface-hover); background:var(--bg-color); color:#fff; font-family:inherit;">
       
       <label style="display:block; margin-bottom:5px; color:var(--text-secondary); font-size:0.9rem;">Objeto</label>
-      <input type="text" id="edit-o" style="width:100%; padding:10px; margin-bottom:25px; border-radius:8px; border:1px solid var(--surface-hover); background:var(--bg-color); color:#fff; font-family:inherit;">
+      <input type="text" id="edit-o" style="width:100%; padding:10px; margin-bottom:20px; border-radius:8px; border:1px solid var(--surface-hover); background:var(--bg-color); color:#fff; font-family:inherit;">
       
+      <div style="margin-bottom:25px; padding:15px; border:1px solid var(--accent-color); border-radius:12px; background:rgba(20,150,255,0.05);">
+         <h4 style="margin-bottom:10px; color:var(--accent-color); font-size:0.95rem; display:flex; align-items:center; gap:5px;">✨ Generador IA Automático</h4>
+         <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:10px; line-height:1.3;">Pega tu token de OpenAI (DALL-E 3) para generar la imagen de tu nuevo personaje. La clave se guarda localmente y de forma segura.</p>
+         <input type="password" id="openai-api-key" placeholder="sk-proj-..." style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid var(--surface-hover); background:var(--bg-color); color:#fff; font-size:0.8rem;">
+         <button class="btn" id="generate-ai-img-btn" style="width:100%; background:linear-gradient(135deg, #10b981, #059669); font-size:0.9rem; margin-bottom:0;">🎨 Generar con DALL-E</button>
+      </div>
+
       <div style="display:flex; gap:10px;">
-        <button class="btn" id="save-edit-btn" style="flex:1;">Guardar</button>
+        <button class="btn" id="save-edit-btn" style="flex:1;">Guardar Carta</button>
         <button class="btn btn-secondary" id="cancel-edit-btn" style="flex:1;">Cancelar</button>
       </div>
     </div>
@@ -241,10 +277,15 @@ function setupLearn() {
         const filtered = filterSuit === 'all' ? paoList : paoList.filter(p => p.s === filterSuit);
 
         filtered.forEach(item => {
+            const imgHtml = getListImgHtml(item.card);
+
             const el = document.createElement('div');
             el.className = 'pao-card';
             el.innerHTML = `
-        <div class="pao-card-img ${item.s}">${item.card}</div>
+        <div class="pao-card-img ${item.s}" style="position:relative; overflow:hidden;">
+           ${imgHtml}
+           <input type="file" accept="image/*" class="pao-image-upload" data-card="${item.card}" style="opacity:0; position:absolute; top:0; left:0; width:100%; height:100%; cursor:pointer; z-index:5;">
+        </div>
         <div class="pao-info">
           <div class="pao-number" style="display:flex; justify-content:space-between; align-items:center;">
              <span>${item.code} - (${item.card})</span>
@@ -260,6 +301,37 @@ function setupLearn() {
             container.appendChild(el);
         });
 
+        // Image Upload Logic for PAO cards
+        $$('.pao-image-upload').forEach(input => {
+            input.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 200; // Keep PAO images smaller to save localStorage space
+                        const scaleSize = MAX_WIDTH / img.width;
+                        canvas.width = MAX_WIDTH;
+                        canvas.height = img.height * scaleSize;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
+                        const cardId = e.target.dataset.card;
+                        customPaoImages[cardId] = compressedDataUrl;
+                        savePaoImages();
+                        // Re-render the current list to show the new image
+                        renderList(filterTabs.querySelector('.active').dataset.suit);
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
         $$('.edit-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const cardId = e.currentTarget.dataset.card;
@@ -268,6 +340,9 @@ function setupLearn() {
                 $('#edit-p').value = currentEditCard.p;
                 $('#edit-a').value = currentEditCard.a;
                 $('#edit-o').value = currentEditCard.o;
+                const savedKey = localStorage.getItem('openai_api_key');
+                if (savedKey) $('#openai-api-key').value = savedKey;
+                $('#generate-ai-img-btn').innerHTML = '🎨 Generar con DALL-E';
                 $('#edit-pao-modal').style.display = 'flex';
             });
         });
@@ -275,6 +350,7 @@ function setupLearn() {
 
     $('#cancel-edit-btn').onclick = () => {
         $('#edit-pao-modal').style.display = 'none';
+        $('#generate-ai-img-btn').innerHTML = '🎨 Generar con DALL-E';
     };
 
     $('#save-edit-btn').onclick = () => {
@@ -283,9 +359,80 @@ function setupLearn() {
             currentEditCard.a = $('#edit-a').value;
             currentEditCard.o = $('#edit-o').value;
             savePaoList(); // From data.js
-            renderList($('.filter-btn.active').dataset.suit);
+            renderList(filterTabs.querySelector('.active').dataset.suit);
         }
         $('#edit-pao-modal').style.display = 'none';
+        $('#generate-ai-img-btn').innerHTML = '🎨 Generar con DALL-E';
+    };
+
+    $('#generate-ai-img-btn').onclick = async () => {
+        const apiKey = $('#openai-api-key').value.trim();
+        if (!apiKey) {
+            alert('Por favor, introduce una clave API de OpenAI válida.');
+            return;
+        }
+
+        localStorage.setItem('openai_api_key', apiKey);
+
+        const btn = $('#generate-ai-img-btn');
+        btn.innerHTML = '⏳ Generando... (puede tardar 15s)';
+        btn.disabled = true;
+
+        const charName = $('#edit-p').value || currentEditCard.p;
+        const action = $('#edit-a').value || currentEditCard.a;
+        const object = $('#edit-o').value || currentEditCard.o;
+        const prompt = `Un retrato vibrante en estilo arte digital/comic 3D de ${charName} realizando la accion de ${action} con un ${object}. Fondo colorido, altisima calidad, estilizado y expresivo. NO TEXT. NO WORDS.`;
+
+        try {
+            const response = await fetch('https://api.openai.com/v1/images/generations', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: "dall-e-3",
+                    prompt: prompt,
+                    n: 1,
+                    size: "1024x1024",
+                    response_format: "b64_json"
+                })
+            });
+
+            const data = await response.json();
+            if (data.error) {
+                throw new Error(data.error.message);
+            }
+
+            const b64Data = data.data[0].b64_json;
+            const dataUrl = `data:image/png;base64,${b64Data}`;
+
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 300;
+                const scaleSize = MAX_WIDTH / img.width;
+                canvas.width = MAX_WIDTH;
+                canvas.height = img.height * scaleSize;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
+                if (currentEditCard) {
+                    customPaoImages[currentEditCard.card] = compressedDataUrl;
+                    savePaoImages();
+                    alert('¡Imagen generada e incrustada con éxito!');
+                    btn.innerHTML = '✅ Imagen Guardada';
+                }
+            };
+            img.src = dataUrl;
+
+        } catch (err) {
+            alert('Error al generar imagen: ' + err.message);
+            btn.innerHTML = '❌ Error';
+        } finally {
+            btn.disabled = false;
+        }
     };
 
     renderList('all');
@@ -326,7 +473,7 @@ function setupPalace() {
         const el = document.createElement('div');
         el.className = 'palace-locus';
         el.dataset.index = i;
-        el.style = 'background: var(--surface-color); border: 1px dashed var(--surface-hover); border-radius: 12px; height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; cursor:pointer; user-select:none; touch-action:none;';
+        el.style = 'background: var(--surface-color); border: 1px dashed var(--surface-hover); border-radius: 12px; height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; cursor:pointer; user-select:none;';
 
         const hasImage = customPalace[i] && customPalace[i].length > 0;
         const routeOrder = i + 1; // 1-18 order
@@ -545,12 +692,13 @@ function generateLessonQuestions(idx) {
 
         pool.forEach(cardData => {
             const isRed = cardData.s === 'hearts' || cardData.s === 'diamonds';
-            const colorStyle = isRed ? 'color:#ff4b4b' : 'color:#c9d1d9';
+            const visualContent = getLessonVisualContent(cardData, isRed, 'personaje');
+            const visualReverse = getLessonVisualContent(cardData, isRed, 'reverse');
 
             flashcards.push({
                 type: 'flashcard',
                 cardId: cardData.card,
-                visual: `<span style="${colorStyle}">${cardData.card}</span>`,
+                visual: visualContent,
                 q: `Aprende: Personaje`,
                 text: `${cardData.card} es ${cardData.p}`,
                 btnText: 'Memorizado'
@@ -564,7 +712,7 @@ function generateLessonQuestions(idx) {
                 type: 'quiz',
                 cardId: cardData.card,
                 q: `¿Qué personaje corresponde a esta carta (${cardData.card})?`,
-                visual: `<span style="${colorStyle}">${cardData.card}</span>`,
+                visual: visualContent,
                 options: options1,
                 correct: options1.indexOf(cardData.p)
             });
@@ -575,7 +723,7 @@ function generateLessonQuestions(idx) {
                 type: 'quiz',
                 cardId: cardData.card,
                 q: `¿Qué carta corresponde al personaje "${cardData.p}"?`,
-                visual: '👤',
+                visual: visualReverse,
                 options: options2,
                 correct: options2.indexOf(cardData.card)
             });
@@ -584,10 +732,13 @@ function generateLessonQuestions(idx) {
         // Actions
         const lessonCards = shuffle([...paoList]).slice(0, levelDef.randomPool);
         lessonCards.forEach(cardData => {
+            const isRed = cardData.s === 'hearts' || cardData.s === 'diamonds';
+            const visualContent = getLessonVisualContent(cardData, isRed, 'accion');
+
             flashcards.push({
                 type: 'flashcard',
                 cardId: cardData.card,
-                visual: '🎬',
+                visual: visualContent,
                 q: `Aprende: Acción`,
                 text: `La acción de ${cardData.p} es "${cardData.a}"`,
                 btnText: 'Memorizado'
@@ -601,7 +752,7 @@ function generateLessonQuestions(idx) {
                 type: 'quiz',
                 cardId: cardData.card,
                 q: `¿Qué ACCIÓN realiza ${cardData.p}?`,
-                visual: '🎬',
+                visual: visualContent,
                 options: options1,
                 correct: options1.indexOf(cardData.a)
             });
@@ -611,8 +762,8 @@ function generateLessonQuestions(idx) {
             quizzes.push({
                 type: 'quiz',
                 cardId: cardData.card,
-                q: `¿De qué personaje es la acción "${cardData.a}" ? `,
-                visual: '🎬',
+                q: `¿De qué personaje es la acción "${cardData.a}"?`,
+                visual: visualContent,
                 options: options2,
                 correct: options2.indexOf(cardData.p)
             });
@@ -620,10 +771,13 @@ function generateLessonQuestions(idx) {
     } else if (levelDef.type === 'objects') {
         const lessonCards = shuffle([...paoList]).slice(0, levelDef.randomPool);
         lessonCards.forEach(cardData => {
+            const isRed = cardData.s === 'hearts' || cardData.s === 'diamonds';
+            const visualContent = getLessonVisualContent(cardData, isRed, 'objeto');
+
             flashcards.push({
                 type: 'flashcard',
                 cardId: cardData.card,
-                visual: '📦',
+                visual: visualContent,
                 q: `Aprende: Objeto`,
                 text: `El objeto de ${cardData.p} es "${cardData.o}"`,
                 btnText: 'Memorizado'
@@ -637,7 +791,7 @@ function generateLessonQuestions(idx) {
                 type: 'quiz',
                 cardId: cardData.card,
                 q: `¿Cuál es el OBJETO icónico de ${cardData.p}?`,
-                visual: '📦',
+                visual: visualContent,
                 options: options1,
                 correct: options1.indexOf(cardData.o)
             });
@@ -647,8 +801,8 @@ function generateLessonQuestions(idx) {
             quizzes.push({
                 type: 'quiz',
                 cardId: cardData.card,
-                q: `¿De qué personaje es el objeto "${cardData.o}" ? `,
-                visual: '📦',
+                q: `¿De qué personaje es el objeto "${cardData.o}"?`,
+                visual: visualContent,
                 options: options2,
                 correct: options2.indexOf(cardData.p)
             });
@@ -781,7 +935,7 @@ function loadQuestion(isReviewMode = false, levelIdx = null) {
                     $$('.option-btn')[q.correct].classList.add('correct');
                     currentLessonFailed = true;
 
-                    $('#lesson-visual').insertAdjacentHTML('afterend', `< div id = "lesson-feedback" style = "margin-top:10px; color:var(--error-color); font-weight:bold;" >¡Incorrecto! La respuesta era: ${q.options[q.correct]}</div > `);
+                    $('#lesson-visual').insertAdjacentHTML('afterend', `<div id="lesson-feedback" style="margin-top:10px; color:var(--error-color); font-weight:bold;">¡Incorrecto! La respuesta era: ${q.options[q.correct]}</div>`);
 
                     if (isReviewMode) {
                         $('#lesson-continue').innerText = 'Continuar (Repaso)';
@@ -879,12 +1033,13 @@ function setupReview() {
                     const others = shuffle(paoList.filter(p => p.card !== cardData.card)).slice(0, 3);
                     const options = shuffle([cardData.p, ...others.map(o => o.p)]);
                     const isRed = cardData.s === 'hearts' || cardData.s === 'diamonds';
-                    const colorStyle = isRed ? 'color:#ff4b4b' : 'color:#c9d1d9';
+                    const visualContent = getLessonVisualContent(cardData, isRed, 'personaje');
+
                     questions.push({
                         type: 'quiz',
                         cardId: cid,
                         q: `Repaso: ¿Qué personaje corresponde a esta carta?`,
-                        visual: `<span style="${colorStyle}">${cardData.card}</span>`,
+                        visual: visualContent,
                         options: options,
                         correct: options.indexOf(cardData.p)
                     });
